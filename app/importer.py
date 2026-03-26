@@ -355,94 +355,98 @@ def seed_comunidades():
     # Sempre recriar para manter atualizado
     conn.execute("DELETE FROM comunidades")
 
+    # Fonte: Censo IBGE 2022 (Favelas e Comunidades Urbanas) + reportagens
+    # SSP-SP, Operação Escudo, Instituto Sou da Paz, Diário do Litoral, A Tribuna
     comunidades = [
-        # === SANTOS ===
-        ("Vila Gilda (Palafitas)", -23.9530, -46.3380, "SANTOS", "Maior comunidade de palafitas da América Latina"),
-        ("Dique da Vila Gilda", -23.9540, -46.3370, "SANTOS", "Área de dique adjacente, sujeita a alagamentos"),
-        ("Morro Nova Cintra", -23.9610, -46.3340, "SANTOS", "Uma das maiores ocupações em encosta de Santos"),
-        ("Morro do Marapé", -23.9580, -46.3440, "SANTOS", "Comunidade em encosta, risco geotécnico"),
-        ("Morro São Bento", -23.9650, -46.3290, "SANTOS", "Ocupação em encosta próxima ao centro histórico"),
-        ("Morro Monte Serrat", -23.9670, -46.3260, "SANTOS", "Ocupações irregulares nas encostas"),
-        ("Morro do Pacheco", -23.9660, -46.3240, "SANTOS", "Comunidade em encosta próxima ao centro"),
-        ("Morro da Penha", -23.9640, -46.3210, "SANTOS", "Ocupação irregular, risco de deslizamento"),
-        ("Morro do Fontana", -23.9590, -46.3500, "SANTOS", "Comunidade em encosta, zona noroeste"),
-        ("Vila Progresso", -23.9510, -46.3420, "SANTOS", "Zona noroeste, área de mangue e alagamento"),
-        ("Pantanal", -23.9490, -46.3350, "SANTOS", "Área alagadiça, ocupação sobre mangue"),
-        ("Rádio Clube", -23.9470, -46.3310, "SANTOS", "Zona noroeste, sujeita a inundações"),
-        ("São Manoel", -23.9520, -46.3290, "SANTOS", "Área de risco, próxima a cursos d'água"),
-        ("Morro Santa Maria", -23.9630, -46.3360, "SANTOS", "Ocupação em encosta com risco geotécnico"),
-        ("Caneleira", -23.9560, -46.3250, "SANTOS", "Região central/portuária, vulnerabilidade social"),
+        # === SANTOS (46 favelas, 46.262 moradores — 11% da pop.) ===
+        # Zona Noroeste — maior concentração de favelas e tráfico
+        ("Dique da Vila Gilda", -23.9561, -46.3440, "SANTOS", "Maior favela de palafitas do Brasil, ~26 mil moradores, crime organizado atua no comércio de 'áreas sobre a maré'"),
+        ("Rádio Clube", -23.9530, -46.3490, "SANTOS", "Bairro com ~26 mil hab., abriga parte da Vila Gilda, alta vulnerabilidade social, Vila Pelé e Vila Telma"),
+        ("Pantanal", -23.9505, -46.3530, "SANTOS", "Comunidade sobre mangue na zona noroeste, tráfico e ocupação irregular"),
+        ("Vila Progresso", -23.9480, -46.3570, "SANTOS", "Zona noroeste, mangue, área de vulnerabilidade e criminalidade"),
+        ("São Manoel", -23.9500, -46.3400, "SANTOS", "Zona noroeste, alta incidência de crimes"),
+        ("Areia Branca", -23.9545, -46.3600, "SANTOS", "Zona noroeste, comunidade vulnerável"),
+        ("Bom Retiro", -23.9570, -46.3470, "SANTOS", "Zona noroeste, faz parte do complexo Vila Gilda"),
+        ("Castelo", -23.9585, -46.3420, "SANTOS", "Zona noroeste, comunidade do complexo Vila Gilda"),
+        ("Chico de Paula", -23.9550, -46.3360, "SANTOS", "Zona noroeste, área de vulnerabilidade social"),
+        # Morros — tráfico, violência policial (Op. Escudo), difícil acesso
+        ("Morro da Penha", -23.9640, -46.3210, "SANTOS", "Comunidade em encosta, tensão com polícia, mencionada na Op. Escudo"),
+        ("Morro do Tetéu", -23.9625, -46.3180, "SANTOS", "Comunidade em morro, clima de tensão e violência, citada em reportagens"),
+        ("Morro Nova Cintra", -23.9610, -46.3340, "SANTOS", "Uma das maiores ocupações em encosta, tráfico"),
+        ("Morro São Bento", -23.9650, -46.3290, "SANTOS", "Próximo ao centro, tráfico e violência"),
+        ("Morro Monte Serrat", -23.9670, -46.3260, "SANTOS", "Ocupações nas encostas, vulnerabilidade social"),
+        ("Morro do Pacheco", -23.9660, -46.3240, "SANTOS", "Comunidade em encosta, criminalidade"),
+        ("Morro do Marapé", -23.9580, -46.3440, "SANTOS", "Encosta, 72 ocorrências de furto/roubo"),
+        ("Morro Santa Maria", -23.9630, -46.3360, "SANTOS", "Encosta com vulnerabilidade social"),
+        ("Caneleira", -23.9560, -46.3250, "SANTOS", "Região portuária, vulnerabilidade e criminalidade"),
+        ("Jabaquara", -23.9600, -46.3300, "SANTOS", "Comunidade em morro, vulnerabilidade social"),
+        # Centro/orla — alto índice de furtos e roubos
+        ("Gonzaga", -23.9660, -46.3370, "SANTOS", "Bairro líder em furtos e roubos de celular e veículos em Santos"),
+        ("Vila Mathias", -23.9620, -46.3300, "SANTOS", "5º bairro em roubos/furtos, 161+ ocorrências"),
+        ("Alemoa", -23.9420, -46.3310, "SANTOS", "Líder em roubos/furtos de veículos (225 ocorrências), zona portuária"),
 
-        # === SÃO VICENTE ===
-        ("México 70", -23.9630, -46.3880, "S.VICENTE", "Uma das maiores comunidades, área de mangue"),
-        ("Dique do Sambaiatuba", -23.9540, -46.3780, "S.VICENTE", "Palafitas às margens do Rio Sambaiatuba"),
-        ("Vila Margarida (área de risco)", -23.9680, -46.3920, "S.VICENTE", "Ocupações em áreas de risco"),
-        ("Saquaré / Japuí", -23.9720, -46.3950, "S.VICENTE", "Ocupação em área de mangue"),
-        ("Parque das Bandeiras", -23.9570, -46.3850, "S.VICENTE", "Área de várzea sujeita a inundações"),
-        ("Vila Ponte Nova", -23.9590, -46.3820, "S.VICENTE", "Área de risco próxima a córregos"),
-        ("Morro dos Barbosas", -23.9610, -46.3730, "S.VICENTE", "Ocupação em encosta, risco de deslizamento"),
-        ("Humaitá", -23.9480, -46.3900, "S.VICENTE", "Área continental, região de mangue"),
-        ("Quarentenário", -23.9500, -46.3830, "S.VICENTE", "Área de risco próxima ao Rio Mariana"),
+        # === SÃO VICENTE (38 favelas, 16 mortes por ação policial em jan-fev/2024) ===
+        ("Quarentenário Público", -23.9270, -46.4270, "S.VICENTE", "3ª maior favela da Baixada, 9.225 moradores, área continental"),
+        ("Jardim Rio Branco", -23.9310, -46.4200, "S.VICENTE", "4ª maior favela da Baixada, 8.278 moradores, alta criminalidade"),
+        ("México 70", -23.9630, -46.3880, "S.VICENTE", "Grande comunidade formada nos anos 70, tráfico e violência, área de mangue"),
+        ("Japuí", -23.9720, -46.3950, "S.VICENTE", "Bairro isolado ligado por ponte, vulnerabilidade social e tráfico"),
+        ("Humaitá", -23.9350, -46.4150, "S.VICENTE", "Conjunto habitacional área continental, criminalidade"),
+        ("Parque das Bandeiras", -23.9290, -46.4230, "S.VICENTE", "Área continental, vulnerabilidade social"),
+        ("Dique do Sambaiatuba", -23.9540, -46.3780, "S.VICENTE", "Palafitas, tráfico e ocupação irregular"),
+        ("Samaritá", -23.9250, -46.4300, "S.VICENTE", "Distrito continental, comunidades vulneráveis"),
 
-        # === GUARUJÁ ===
-        ("Vila Baiana", -23.9870, -46.2570, "GUARUJA", "Uma das maiores comunidades, ocupação em encosta"),
-        ("Morrinhos I e II", -23.9830, -46.2610, "GUARUJA", "Morro com alto risco geotécnico"),
-        ("Morro do Engenho", -23.9850, -46.2540, "GUARUJA", "Área de risco em encosta"),
-        ("Vila Zilda", -23.9890, -46.2550, "GUARUJA", "Ocupação densa e irregular em encosta"),
-        ("Morro da Cachoeira", -23.9810, -46.2580, "GUARUJA", "Ocupação com risco de escorregamento"),
-        ("Vila Áurea", -23.9860, -46.2630, "GUARUJA", "Área de vulnerabilidade social"),
-        ("Morro do Macaco", -23.9820, -46.2650, "GUARUJA", "Encosta íngreme, risco classificado pela Defesa Civil"),
-        ("Jardim Virgínia", -23.9910, -46.2500, "GUARUJA", "Vicente de Carvalho, ocupação irregular"),
-        ("Santa Cruz dos Navegantes", -23.9950, -46.2480, "GUARUJA", "Palafitas em Vicente de Carvalho"),
-        ("Jardim Progresso", -23.9930, -46.2520, "GUARUJA", "Área de risco em Vicente de Carvalho"),
-        ("Morro do Outeiro", -23.9880, -46.2490, "GUARUJA", "Encosta com histórico de eventos geotécnicos"),
+        # === GUARUJÁ (55 favelas, 106 mil moradores — 36,8% da pop., cidade mais perigosa da Baixada) ===
+        ("Morrinhos III", -23.9960, -46.2580, "GUARUJA", "3ª maior favela do Guarujá, 7.693 moradores, histórico de violência policial e tráfico"),
+        ("Complexo Prainha", -23.9920, -46.2550, "GUARUJA", "7.638 moradores, tensão com polícia, citada na Op. Escudo"),
+        ("Perequê", -23.9990, -46.2350, "GUARUJA", "7.383 moradores, comunidade grande com tráfico"),
+        ("Vila Baiana", -23.9870, -46.2570, "GUARUJA", "Comunidade em Vicente de Carvalho, vítimas de violência policial"),
+        ("Vila Zilda", -23.9890, -46.2550, "GUARUJA", "Moradores relatam terror, Op. Escudo matou moradores, tráfico intenso"),
+        ("Morro do Macaco", -23.9940, -46.2620, "GUARUJA", "Comunidade em encosta, clima de tensão e violência armada"),
+        ("Santa Cruz dos Navegantes", -23.9830, -46.2640, "GUARUJA", "Comunidade grande, vulnerabilidade e criminalidade"),
+        ("Sítio Conceiçãozinha", -23.9810, -46.2700, "GUARUJA", "Vicente de Carvalho, ~6 mil moradores, conflito com Porto"),
+        ("Jardim Progresso", -23.9930, -46.2520, "GUARUJA", "Vicente de Carvalho, ocupação com criminalidade"),
+        ("Morro do Engenho", -23.9850, -46.2540, "GUARUJA", "Comunidade em encosta, tráfico"),
+        ("Jardim Virgínia", -23.9910, -46.2500, "GUARUJA", "Vicente de Carvalho, vulnerabilidade social"),
 
-        # === CUBATÃO ===
-        ("Cota 200", -23.8780, -46.3580, "CUBATAO", "Encosta da Serra do Mar, altíssimo risco de deslizamento"),
-        ("Cota 400", -23.8720, -46.3620, "CUBATAO", "Encosta da Serra do Mar cota 400m, uma das mais perigosas do Brasil"),
-        ("Cota 95/100", -23.8810, -46.3560, "CUBATAO", "Encosta da Serra do Mar, cota mais baixa"),
-        ("Pilões", -23.8850, -46.3700, "CUBATAO", "Comunidade ribeirinha, enchentes e deslizamentos"),
-        ("Água Fria", -23.8900, -46.3650, "CUBATAO", "Área de risco próxima a encostas e cursos d'água"),
-        ("Vila Esperança", -23.8870, -46.3500, "CUBATAO", "Ocupação em área de risco"),
-        ("Grotão", -23.8830, -46.3540, "CUBATAO", "Área de vale/encosta, risco de inundação"),
-        ("Vila dos Pescadores", -23.9000, -46.3650, "CUBATAO", "Área de mangue às margens do estuário"),
-        ("Fabril", -23.8950, -46.3600, "CUBATAO", "Ocupação irregular próxima à zona industrial"),
+        # === CUBATÃO (17 favelas, 36.724 moradores — 32,7% da pop., 7 mortes policiais jan-fev/2024) ===
+        ("Vila Esperança", -23.8870, -46.3500, "CUBATAO", "Maior favela da Baixada: 17.040 moradores, 9ª do estado, tráfico e violência"),
+        ("Vila dos Pescadores", -23.9000, -46.3650, "CUBATAO", "2ª maior: 9.838 moradores, mangue, tráfico, R$200mi em urbanização"),
+        ("Cota 200", -23.8780, -46.3580, "CUBATAO", "Serra do Mar, isolamento, tráfico e difícil acesso policial"),
+        ("Cota 400", -23.8720, -46.3620, "CUBATAO", "Serra do Mar cota 400m, extrema vulnerabilidade"),
+        ("Cota 95/100", -23.8810, -46.3560, "CUBATAO", "Serra do Mar, ocupação irregular, criminalidade"),
+        ("Pilões", -23.8850, -46.3700, "CUBATAO", "Comunidade ribeirinha, vulnerabilidade social"),
+        ("Grotão", -23.8830, -46.3540, "CUBATAO", "Comunidade vulnerável"),
+        ("Sítio Novo / Morro do Índio", -23.8860, -46.3470, "CUBATAO", "Expansão de favelas, invasão de mangue"),
+        ("Fabril", -23.8950, -46.3600, "CUBATAO", "Próxima à zona industrial, criminalidade"),
 
-        # === PRAIA GRANDE ===
-        ("Vila Sônia / Vila Mirim", -24.0100, -46.4300, "PRAIA GRANDE", "Ocupação irregular sujeita a alagamentos"),
-        ("Jardim Quietude", -24.0050, -46.4200, "PRAIA GRANDE", "Área de risco de inundação"),
-        ("Sítio do Campo", -24.0000, -46.4350, "PRAIA GRANDE", "Ocupação em várzea, sujeita a enchentes"),
-        ("Jardim Samambaia", -23.9950, -46.4400, "PRAIA GRANDE", "Risco de alagamento, próxima a córregos"),
-        ("Tude Bastos (área de risco)", -24.0150, -46.4150, "PRAIA GRANDE", "Bolsões de ocupação irregular"),
-        ("Ribeirópolis", -24.0020, -46.4280, "PRAIA GRANDE", "Área sujeita a alagamentos"),
-        ("Jardim Real", -24.0080, -46.4100, "PRAIA GRANDE", "Ocupação com riscos de alagamento"),
+        # === PRAIA GRANDE (12 favelas, 21.315 moradores, 2 mortes policiais jan-fev/2024) ===
+        ("Sítio do Campo", -24.0000, -46.4350, "PRAIA GRANDE", "Top 5 criminalidade em Praia Grande, 171 ocorrências"),
+        ("Vila Mirim", -24.0100, -46.4300, "PRAIA GRANDE", "Bairro com 159 ocorrências criminais"),
+        ("Vila Caiçara", -24.0050, -46.4250, "PRAIA GRANDE", "139 ocorrências, área vulnerável"),
+        ("Jardim Quietude", -24.0060, -46.4200, "PRAIA GRANDE", "Comunidade vulnerável, criminalidade"),
+        ("Vila Antártica", -24.0120, -46.4180, "PRAIA GRANDE", "131 ocorrências criminais"),
+        ("Ribeirópolis", -24.0020, -46.4280, "PRAIA GRANDE", "Comunidade com vulnerabilidade social"),
+        ("Trevo", -24.0080, -46.4150, "PRAIA GRANDE", "156 ocorrências, área de risco criminal"),
 
-        # === BERTIOGA ===
-        ("Indaiá (ocupações)", -23.8540, -46.1380, "BERTIOGA", "Ocupações próximas a encostas e rios"),
-        ("Boracéia (ocupações)", -23.7800, -46.0200, "BERTIOGA", "Áreas de risco próximas à Serra"),
-        ("Vista Linda", -23.8480, -46.1300, "BERTIOGA", "Risco geotécnico e de inundação"),
-        ("Jardim Rio da Praia", -23.8520, -46.1350, "BERTIOGA", "Enchentes do Rio Itapanhaú"),
-        ("Chácaras Vista Linda", -23.8500, -46.1250, "BERTIOGA", "Risco de alagamento e escorregamento"),
+        # === BERTIOGA (24 favelas) ===
+        ("Indaiá", -23.8540, -46.1380, "BERTIOGA", "Comunidade vulnerável, criminalidade"),
+        ("Vista Linda", -23.8480, -46.1300, "BERTIOGA", "Loteamento com vulnerabilidade social"),
+        ("Boracéia", -23.7800, -46.0200, "BERTIOGA", "Comunidades vulneráveis"),
 
-        # === MONGAGUÁ ===
-        ("Agenor de Campos", -24.0800, -46.6200, "MONGAGUA", "Ocupações em áreas de risco"),
-        ("Jardim Praia Grande (Mongaguá)", -24.0850, -46.6250, "MONGAGUA", "Área sujeita a alagamentos"),
-        ("Vila Atlântica", -24.0900, -46.6180, "MONGAGUA", "Ocupação próxima a morros e córregos"),
-        ("Parque Marinho", -24.0750, -46.6150, "MONGAGUA", "Ocupações irregulares sujeitas a inundação"),
+        # === ITANHAÉM (1º lugar no ranking IECV do Instituto Sou da Paz) ===
+        ("Belas Artes", -24.1800, -46.7850, "ITANHAEM", "Comunidade vulnerável, alta criminalidade"),
+        ("Jardim Suarão", -24.1750, -46.7900, "ITANHAEM", "Área de vulnerabilidade social"),
+        ("Gaivota", -24.1700, -46.7950, "ITANHAEM", "Comunidade com criminalidade"),
+        ("Cibratel", -24.1900, -46.7750, "ITANHAEM", "Área vulnerável"),
 
-        # === ITANHAÉM ===
-        ("Belas Artes", -24.1800, -46.7850, "ITANHAEM", "Ocupações em região de mangue e várzea"),
-        ("Jardim Suarão", -24.1750, -46.7900, "ITANHAEM", "Área sujeita a inundações"),
-        ("Jardim Jamaica", -24.1850, -46.7800, "ITANHAEM", "Risco de alagamento"),
-        ("Gaivota", -24.1700, -46.7950, "ITANHAEM", "Ocupações em encosta e várzea"),
-        ("Cibratel", -24.1900, -46.7750, "ITANHAEM", "Áreas de risco geotécnico"),
+        # === MONGAGUÁ (2º lugar no ranking IECV, 1 morte policial jan-fev/2024) ===
+        ("Agenor de Campos", -24.0800, -46.6200, "MONGAGUA", "Distrito com maior criminalidade de Mongaguá"),
+        ("Jardim Praia Grande", -24.0850, -46.6250, "MONGAGUA", "Área de vulnerabilidade social"),
 
-        # === PERUÍBE ===
-        ("Jardim Caraguava", -24.3100, -47.0000, "PERUIBE", "Risco de inundação e escorregamento"),
-        ("Vila Peruíbe", -24.3200, -46.9950, "PERUIBE", "Ocupações em áreas de risco"),
-        ("Jardim São João", -24.3150, -46.9900, "PERUIBE", "Área sujeita a alagamentos"),
-        ("Balneário São João Batista", -24.3050, -46.9850, "PERUIBE", "Risco próximo a córregos e encostas"),
-        ("Caraguava (Serra)", -24.3000, -47.0050, "PERUIBE", "Ocupações em encosta da Serra"),
+        # === PERUÍBE (3º no ranking IECV do Instituto Sou da Paz) ===
+        ("Jardim Caraguava", -24.3100, -47.0000, "PERUIBE", "Comunidade com alta criminalidade"),
+        ("Vila Peruíbe", -24.3200, -46.9950, "PERUIBE", "Área de vulnerabilidade e criminalidade"),
+        ("Jardim São João", -24.3150, -46.9900, "PERUIBE", "Comunidade vulnerável"),
     ]
 
     conn.executemany(
