@@ -31,16 +31,17 @@ def api_ocorrencias():
     tipo = request.args.get("tipo")
     municipios_param = request.args.get("municipios")
     municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
+    naturezas_param = request.args.get("naturezas")
+    naturezas = [n.strip() for n in naturezas_param.split(",")] if naturezas_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
-    natureza = request.args.get("natureza")
 
     rows = query_ocorrencias(
         tipo=tipo,
         municipios=municipios,
         data_inicio=data_inicio,
         data_fim=data_fim,
-        natureza=natureza,
+        naturezas=naturezas,
     )
 
     # Formato compacto: arrays ao invés de objetos para reduzir tamanho
@@ -78,9 +79,11 @@ def api_ocorrencias():
 def api_stats():
     municipios_param = request.args.get("municipios")
     municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
+    naturezas_param = request.args.get("naturezas")
+    naturezas = [n.strip() for n in naturezas_param.split(",")] if naturezas_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
-    stats = get_stats(municipios=municipios, data_inicio=data_inicio, data_fim=data_fim)
+    stats = get_stats(municipios=municipios, data_inicio=data_inicio, data_fim=data_fim, naturezas=naturezas)
     return jsonify(stats)
 
 

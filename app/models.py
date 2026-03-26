@@ -70,8 +70,20 @@ def _build_municipio_clause(municipios):
     return f" AND municipio IN ({placeholders})", list(municipios)
 
 
+def _build_natureza_clause(naturezas):
+    """Constrói cláusula WHERE para lista de naturezas (LIKE com OR). Retorna (sql, params)."""
+    if not naturezas:
+        return "", []
+    conditions = []
+    params = []
+    for n in naturezas:
+        conditions.append("natureza LIKE ?")
+        params.append(f"%{n}%")
+    return " AND (" + " OR ".join(conditions) + ")", params
+
+
 def query_ocorrencias(tipo=None, municipios=None, data_inicio=None, data_fim=None,
-                      natureza=None, limit=50000):
+                      naturezas=None, limit=50000):
     conn = get_db()
     sql = "SELECT lat, lon, tipo, rubrica, natureza, data, hora, bairro, logradouro, municipio, tipo_local, tipo_veiculo FROM ocorrencias WHERE 1=1"
     params = []
@@ -90,9 +102,10 @@ def query_ocorrencias(tipo=None, municipios=None, data_inicio=None, data_fim=Non
     if data_fim:
         sql += " AND data <= ?"
         params.append(data_fim)
-    if natureza:
-        sql += " AND natureza LIKE ?"
-        params.append(f"%{natureza}%")
+
+    nat_sql, nat_params = _build_natureza_clause(naturezas)
+    sql += nat_sql
+    params.extend(nat_params)
 
     sql += " LIMIT ?"
     params.append(limit)
@@ -102,7 +115,7 @@ def query_ocorrencias(tipo=None, municipios=None, data_inicio=None, data_fim=Non
     return [dict(r) for r in rows]
 
 
-def get_stats(municipios=None, data_inicio=None, data_fim=None):
+def get_stats(municipios=None, data_inicio=None, data_fim=None, naturezas=None):
     conn = get_db()
     where = "WHERE 1=1"
     params = []
@@ -117,6 +130,10 @@ def get_stats(municipios=None, data_inicio=None, data_fim=None):
     if data_fim:
         where += " AND data <= ?"
         params.append(data_fim)
+
+    nat_sql, nat_params = _build_natureza_clause(naturezas)
+    where += nat_sql
+    params.extend(nat_params)
 
     stats = {}
     for key, cond in [("total", ""), ("roubos", " AND natureza LIKE '%ROUBO%'"),

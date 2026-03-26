@@ -91,14 +91,24 @@
         </div>
       </div>
     </div>
-    <select class="filter-select" id="filterNatureza">
-      <option value="">Todas as naturezas</option>
-      <option value="FURTO">Furtos</option>
-      <option value="ROUBO">Roubos</option>
-      <option value="HOMICÍDIO">Homicídios</option>
-      <option value="TRÁFICO">Tráfico</option>
-      <option value="LESÃO">Lesão Corporal</option>
-    </select>
+    <label class="filter-label" style="margin-top:6px">Natureza</label>
+    <div class="natureza-toggles" id="naturezaToggles">
+      <button class="natureza-toggle active" data-natureza="FURTO">
+        <span class="nt-check">&#10003;</span><span class="nt-label">Furtos</span>
+      </button>
+      <button class="natureza-toggle active" data-natureza="ROUBO">
+        <span class="nt-check">&#10003;</span><span class="nt-label">Roubos</span>
+      </button>
+      <button class="natureza-toggle active" data-natureza="HOMICÍDIO">
+        <span class="nt-check">&#10003;</span><span class="nt-label">Homicídios</span>
+      </button>
+      <button class="natureza-toggle active" data-natureza="TRÁFICO">
+        <span class="nt-check">&#10003;</span><span class="nt-label">Tráfico</span>
+      </button>
+      <button class="natureza-toggle active" data-natureza="LESÃO">
+        <span class="nt-check">&#10003;</span><span class="nt-label">Lesão Corporal</span>
+      </button>
+    </div>
     <button class="btn-apply" id="btnApplyFilters">Aplicar Filtros</button>
   </div>
 

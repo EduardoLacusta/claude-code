@@ -6,6 +6,8 @@ let rawData = { criminais: [], celulares: [], veiculos: [] };
 let comunidades = [];
 let allMunicipios = [];
 let selectedMunicipios = new Set();
+let activeNaturezas = new Set(['FURTO', 'ROUBO', 'HOMICÍDIO', 'TRÁFICO', 'LESÃO']);
+const ALL_NATUREZAS = ['FURTO', 'ROUBO', 'HOMICÍDIO', 'TRÁFICO', 'LESÃO'];
 
 const COLORS = { criminais: '#ef4444', celulares: '#f59e0b', veiculos: '#3b82f6' };
 
@@ -291,14 +293,18 @@ async function loadData() {
 
 function buildFilterParams() {
   const params = new URLSearchParams();
-  const nat = document.getElementById('filterNatureza').value;
   const di = document.getElementById('filterDataInicio').value;
   const df = document.getElementById('filterDataFim').value;
 
   if (selectedMunicipios.size > 0 && selectedMunicipios.size < allMunicipios.length) {
     params.set('municipios', [...selectedMunicipios].join(','));
   }
-  if (nat) params.set('natureza', nat);
+  // Only send naturezas filter if not all are active
+  if (activeNaturezas.size > 0 && activeNaturezas.size < ALL_NATUREZAS.length) {
+    params.set('naturezas', [...activeNaturezas].join(','));
+  } else if (activeNaturezas.size === 0) {
+    params.set('naturezas', '__NONE__');
+  }
   if (di) params.set('data_inicio', di);
   if (df) params.set('data_fim', df);
 
@@ -525,6 +531,19 @@ document.addEventListener('DOMContentLoaded', () => {
       activeLayers[layer] = !activeLayers[layer];
       btn.classList.toggle('active');
       renderView();
+    });
+  });
+
+  // Natureza toggles
+  document.querySelectorAll('.natureza-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const nat = btn.dataset.natureza;
+      if (activeNaturezas.has(nat)) {
+        activeNaturezas.delete(nat);
+      } else {
+        activeNaturezas.add(nat);
+      }
+      btn.classList.toggle('active');
     });
   });
 
