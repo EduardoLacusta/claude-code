@@ -252,13 +252,6 @@ body {
 }
 .date-range .filter-input { width:auto; flex:1; }
 
-.btn-apply {
-  width:100%; padding:8px; border:none; border-radius:6px;
-  background:var(--btn-primary-bg); color:#fff;
-  font-family:inherit; font-size:12px; font-weight:600;
-  cursor:pointer; transition:background 0.2s; margin-top:4px;
-}
-.btn-apply:hover { background:var(--btn-primary-hover); }
 
 /* ======= Stats ======= */
 .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }

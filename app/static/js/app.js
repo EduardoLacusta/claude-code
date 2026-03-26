@@ -17,6 +17,12 @@ const BAIXADA_SANTISTA = [
   'MONGAGUA', 'MONGAGUÁ', 'PERUIBE', 'PERUÍBE', 'BERTIOGA',
 ];
 
+let _debounceTimer = null;
+function debouncedLoadData() {
+  clearTimeout(_debounceTimer);
+  _debounceTimer = setTimeout(() => loadData(), 400);
+}
+
 const TILE_URLS = {
   dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
   light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
@@ -59,18 +65,21 @@ function selectBaixada() {
   });
   renderMunicipioList();
   updateMunicipioLabel();
+  debouncedLoadData();
 }
 
 function selectAll() {
   selectedMunicipios = new Set(allMunicipios);
   renderMunicipioList();
   updateMunicipioLabel();
+  debouncedLoadData();
 }
 
 function selectNone() {
   selectedMunicipios.clear();
   renderMunicipioList();
   updateMunicipioLabel();
+  debouncedLoadData();
 }
 
 function updateMunicipioLabel() {
@@ -141,6 +150,7 @@ function renderMunicipioList(filter) {
       }
       item.classList.toggle('selected');
       updateMunicipioLabel();
+      debouncedLoadData();
     });
 
     list.appendChild(item);
@@ -544,11 +554,13 @@ document.addEventListener('DOMContentLoaded', () => {
         activeNaturezas.add(nat);
       }
       btn.classList.toggle('active');
+      debouncedLoadData();
     });
   });
 
-  // Apply filters
-  document.getElementById('btnApplyFilters').addEventListener('click', () => loadData());
+  // Date inputs
+  document.getElementById('filterDataInicio').addEventListener('change', debouncedLoadData);
+  document.getElementById('filterDataFim').addEventListener('change', debouncedLoadData);
 
   // Import buttons
   document.getElementById('btnUpdate').addEventListener('click', () => triggerImport(null, 2026));
