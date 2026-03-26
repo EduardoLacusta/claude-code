@@ -348,40 +348,101 @@ def import_all(years=None):
 
 
 def seed_comunidades():
-    """Insere os dados fixos de comunidades/áreas de risco."""
+    """Insere/atualiza os dados fixos de comunidades/áreas de risco."""
     init_db()
     conn = get_db()
 
-    existing = conn.execute("SELECT COUNT(*) as n FROM comunidades").fetchone()["n"]
-    if existing > 0:
-        conn.close()
-        return
+    # Sempre recriar para manter atualizado
+    conn.execute("DELETE FROM comunidades")
 
     comunidades = [
-        ("Vila Gilda", -23.9685, -46.3923, "SANTOS", "Maior palafita da América Latina"),
-        ("Dique da Vila Gilda", -23.9710, -46.3940, "SANTOS", "Extensão das palafitas sobre mangue"),
-        ("Jardim Piratininga", -23.9620, -46.3870, "SANTOS", "Área de risco em Santos"),
-        ("Rádio Clube", -23.9750, -46.3560, "SANTOS", "Região vulnerável"),
-        ("Vila Pantanal", -23.9640, -46.3710, "SANTOS", "Área de ocupação irregular"),
-        ("Morro da Nova Cintra", -23.9590, -46.3340, "SANTOS", "Encosta com risco de deslizamento"),
-        ("Morro do Marapé", -23.9560, -46.3460, "SANTOS", "Comunidade em encosta"),
-        ("Morro Santa Maria", -23.9510, -46.3380, "SANTOS", "Área de risco geológico"),
-        ("Morro do São Bento", -23.9545, -46.3290, "SANTOS", "Ocupação em encosta"),
-        ("Vila Esperança", -23.9680, -46.3850, "SANTOS", "Comunidade na zona noroeste"),
-        ("Dique do Sambaiatuba", -23.9578, -46.3980, "S.VICENTE", "Palafitas e ocupação irregular"),
-        ("México 70", -23.9650, -46.4056, "S.VICENTE", "Comunidade"),
-        ("Vila Margarida", -23.9530, -46.3990, "S.VICENTE", "Área de risco"),
-        ("Jardim Rio Branco", -23.9460, -46.4100, "S.VICENTE", "Comunidade"),
-        ("Vila Baiana", -23.9894, -46.2667, "GUARUJA", "Comunidade Vicente de Carvalho"),
-        ("Favela do Morrinhos", -23.9940, -46.2590, "GUARUJA", "Área de ocupação"),
-        ("Vila Zilda", -23.9970, -46.2530, "GUARUJA", "Comunidade no Guarujá"),
-        ("Jardim Progresso", -24.0050, -46.2620, "GUARUJA", "Área de ocupação"),
-        ("Sítio do Campo", -24.0152, -46.4350, "PRAIA GRANDE", "Região com alto índice criminal"),
-        ("Nova Mirim", -24.0290, -46.4480, "PRAIA GRANDE", "Região periférica"),
-        ("Quietude", -24.0220, -46.4250, "PRAIA GRANDE", "Área com ocupações irregulares"),
-        ("Vila Esperança (Cubatão)", -23.8870, -46.4180, "CUBATAO", "Comunidade em Cubatão"),
-        ("Cota 200", -23.8750, -46.4050, "CUBATAO", "Ocupação em área de serra"),
-        ("Pilões", -23.8920, -46.3950, "CUBATAO", "Área de risco geológico"),
+        # === SANTOS ===
+        ("Vila Gilda (Palafitas)", -23.9530, -46.3380, "SANTOS", "Maior comunidade de palafitas da América Latina"),
+        ("Dique da Vila Gilda", -23.9540, -46.3370, "SANTOS", "Área de dique adjacente, sujeita a alagamentos"),
+        ("Morro Nova Cintra", -23.9610, -46.3340, "SANTOS", "Uma das maiores ocupações em encosta de Santos"),
+        ("Morro do Marapé", -23.9580, -46.3440, "SANTOS", "Comunidade em encosta, risco geotécnico"),
+        ("Morro São Bento", -23.9650, -46.3290, "SANTOS", "Ocupação em encosta próxima ao centro histórico"),
+        ("Morro Monte Serrat", -23.9670, -46.3260, "SANTOS", "Ocupações irregulares nas encostas"),
+        ("Morro do Pacheco", -23.9660, -46.3240, "SANTOS", "Comunidade em encosta próxima ao centro"),
+        ("Morro da Penha", -23.9640, -46.3210, "SANTOS", "Ocupação irregular, risco de deslizamento"),
+        ("Morro do Fontana", -23.9590, -46.3500, "SANTOS", "Comunidade em encosta, zona noroeste"),
+        ("Vila Progresso", -23.9510, -46.3420, "SANTOS", "Zona noroeste, área de mangue e alagamento"),
+        ("Pantanal", -23.9490, -46.3350, "SANTOS", "Área alagadiça, ocupação sobre mangue"),
+        ("Rádio Clube", -23.9470, -46.3310, "SANTOS", "Zona noroeste, sujeita a inundações"),
+        ("São Manoel", -23.9520, -46.3290, "SANTOS", "Área de risco, próxima a cursos d'água"),
+        ("Morro Santa Maria", -23.9630, -46.3360, "SANTOS", "Ocupação em encosta com risco geotécnico"),
+        ("Caneleira", -23.9560, -46.3250, "SANTOS", "Região central/portuária, vulnerabilidade social"),
+
+        # === SÃO VICENTE ===
+        ("México 70", -23.9630, -46.3880, "S.VICENTE", "Uma das maiores comunidades, área de mangue"),
+        ("Dique do Sambaiatuba", -23.9540, -46.3780, "S.VICENTE", "Palafitas às margens do Rio Sambaiatuba"),
+        ("Vila Margarida (área de risco)", -23.9680, -46.3920, "S.VICENTE", "Ocupações em áreas de risco"),
+        ("Saquaré / Japuí", -23.9720, -46.3950, "S.VICENTE", "Ocupação em área de mangue"),
+        ("Parque das Bandeiras", -23.9570, -46.3850, "S.VICENTE", "Área de várzea sujeita a inundações"),
+        ("Vila Ponte Nova", -23.9590, -46.3820, "S.VICENTE", "Área de risco próxima a córregos"),
+        ("Morro dos Barbosas", -23.9610, -46.3730, "S.VICENTE", "Ocupação em encosta, risco de deslizamento"),
+        ("Humaitá", -23.9480, -46.3900, "S.VICENTE", "Área continental, região de mangue"),
+        ("Quarentenário", -23.9500, -46.3830, "S.VICENTE", "Área de risco próxima ao Rio Mariana"),
+
+        # === GUARUJÁ ===
+        ("Vila Baiana", -23.9870, -46.2570, "GUARUJA", "Uma das maiores comunidades, ocupação em encosta"),
+        ("Morrinhos I e II", -23.9830, -46.2610, "GUARUJA", "Morro com alto risco geotécnico"),
+        ("Morro do Engenho", -23.9850, -46.2540, "GUARUJA", "Área de risco em encosta"),
+        ("Vila Zilda", -23.9890, -46.2550, "GUARUJA", "Ocupação densa e irregular em encosta"),
+        ("Morro da Cachoeira", -23.9810, -46.2580, "GUARUJA", "Ocupação com risco de escorregamento"),
+        ("Vila Áurea", -23.9860, -46.2630, "GUARUJA", "Área de vulnerabilidade social"),
+        ("Morro do Macaco", -23.9820, -46.2650, "GUARUJA", "Encosta íngreme, risco classificado pela Defesa Civil"),
+        ("Jardim Virgínia", -23.9910, -46.2500, "GUARUJA", "Vicente de Carvalho, ocupação irregular"),
+        ("Santa Cruz dos Navegantes", -23.9950, -46.2480, "GUARUJA", "Palafitas em Vicente de Carvalho"),
+        ("Jardim Progresso", -23.9930, -46.2520, "GUARUJA", "Área de risco em Vicente de Carvalho"),
+        ("Morro do Outeiro", -23.9880, -46.2490, "GUARUJA", "Encosta com histórico de eventos geotécnicos"),
+
+        # === CUBATÃO ===
+        ("Cota 200", -23.8780, -46.3580, "CUBATAO", "Encosta da Serra do Mar, altíssimo risco de deslizamento"),
+        ("Cota 400", -23.8720, -46.3620, "CUBATAO", "Encosta da Serra do Mar cota 400m, uma das mais perigosas do Brasil"),
+        ("Cota 95/100", -23.8810, -46.3560, "CUBATAO", "Encosta da Serra do Mar, cota mais baixa"),
+        ("Pilões", -23.8850, -46.3700, "CUBATAO", "Comunidade ribeirinha, enchentes e deslizamentos"),
+        ("Água Fria", -23.8900, -46.3650, "CUBATAO", "Área de risco próxima a encostas e cursos d'água"),
+        ("Vila Esperança", -23.8870, -46.3500, "CUBATAO", "Ocupação em área de risco"),
+        ("Grotão", -23.8830, -46.3540, "CUBATAO", "Área de vale/encosta, risco de inundação"),
+        ("Vila dos Pescadores", -23.9000, -46.3650, "CUBATAO", "Área de mangue às margens do estuário"),
+        ("Fabril", -23.8950, -46.3600, "CUBATAO", "Ocupação irregular próxima à zona industrial"),
+
+        # === PRAIA GRANDE ===
+        ("Vila Sônia / Vila Mirim", -24.0100, -46.4300, "PRAIA GRANDE", "Ocupação irregular sujeita a alagamentos"),
+        ("Jardim Quietude", -24.0050, -46.4200, "PRAIA GRANDE", "Área de risco de inundação"),
+        ("Sítio do Campo", -24.0000, -46.4350, "PRAIA GRANDE", "Ocupação em várzea, sujeita a enchentes"),
+        ("Jardim Samambaia", -23.9950, -46.4400, "PRAIA GRANDE", "Risco de alagamento, próxima a córregos"),
+        ("Tude Bastos (área de risco)", -24.0150, -46.4150, "PRAIA GRANDE", "Bolsões de ocupação irregular"),
+        ("Ribeirópolis", -24.0020, -46.4280, "PRAIA GRANDE", "Área sujeita a alagamentos"),
+        ("Jardim Real", -24.0080, -46.4100, "PRAIA GRANDE", "Ocupação com riscos de alagamento"),
+
+        # === BERTIOGA ===
+        ("Indaiá (ocupações)", -23.8540, -46.1380, "BERTIOGA", "Ocupações próximas a encostas e rios"),
+        ("Boracéia (ocupações)", -23.7800, -46.0200, "BERTIOGA", "Áreas de risco próximas à Serra"),
+        ("Vista Linda", -23.8480, -46.1300, "BERTIOGA", "Risco geotécnico e de inundação"),
+        ("Jardim Rio da Praia", -23.8520, -46.1350, "BERTIOGA", "Enchentes do Rio Itapanhaú"),
+        ("Chácaras Vista Linda", -23.8500, -46.1250, "BERTIOGA", "Risco de alagamento e escorregamento"),
+
+        # === MONGAGUÁ ===
+        ("Agenor de Campos", -24.0800, -46.6200, "MONGAGUA", "Ocupações em áreas de risco"),
+        ("Jardim Praia Grande (Mongaguá)", -24.0850, -46.6250, "MONGAGUA", "Área sujeita a alagamentos"),
+        ("Vila Atlântica", -24.0900, -46.6180, "MONGAGUA", "Ocupação próxima a morros e córregos"),
+        ("Parque Marinho", -24.0750, -46.6150, "MONGAGUA", "Ocupações irregulares sujeitas a inundação"),
+
+        # === ITANHAÉM ===
+        ("Belas Artes", -24.1800, -46.7850, "ITANHAEM", "Ocupações em região de mangue e várzea"),
+        ("Jardim Suarão", -24.1750, -46.7900, "ITANHAEM", "Área sujeita a inundações"),
+        ("Jardim Jamaica", -24.1850, -46.7800, "ITANHAEM", "Risco de alagamento"),
+        ("Gaivota", -24.1700, -46.7950, "ITANHAEM", "Ocupações em encosta e várzea"),
+        ("Cibratel", -24.1900, -46.7750, "ITANHAEM", "Áreas de risco geotécnico"),
+
+        # === PERUÍBE ===
+        ("Jardim Caraguava", -24.3100, -47.0000, "PERUIBE", "Risco de inundação e escorregamento"),
+        ("Vila Peruíbe", -24.3200, -46.9950, "PERUIBE", "Ocupações em áreas de risco"),
+        ("Jardim São João", -24.3150, -46.9900, "PERUIBE", "Área sujeita a alagamentos"),
+        ("Balneário São João Batista", -24.3050, -46.9850, "PERUIBE", "Risco próximo a córregos e encostas"),
+        ("Caraguava (Serra)", -24.3000, -47.0050, "PERUIBE", "Ocupações em encosta da Serra"),
     ]
 
     conn.executemany(
