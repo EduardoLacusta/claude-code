@@ -62,7 +62,15 @@ def init_db():
     conn.close()
 
 
-def query_ocorrencias(tipo=None, municipio=None, data_inicio=None, data_fim=None,
+def _build_municipio_clause(municipios):
+    """Constrói cláusula WHERE para lista de municípios. Retorna (sql, params)."""
+    if not municipios:
+        return "", []
+    placeholders = ",".join("?" for _ in municipios)
+    return f" AND municipio IN ({placeholders})", list(municipios)
+
+
+def query_ocorrencias(tipo=None, municipios=None, data_inicio=None, data_fim=None,
                       natureza=None, limit=50000):
     conn = get_db()
     sql = "SELECT lat, lon, tipo, rubrica, natureza, data, hora, bairro, logradouro, municipio, tipo_local, tipo_veiculo FROM ocorrencias WHERE 1=1"
@@ -71,9 +79,11 @@ def query_ocorrencias(tipo=None, municipio=None, data_inicio=None, data_fim=None
     if tipo:
         sql += " AND tipo = ?"
         params.append(tipo)
-    if municipio:
-        sql += " AND municipio = ?"
-        params.append(municipio)
+
+    mun_sql, mun_params = _build_municipio_clause(municipios)
+    sql += mun_sql
+    params.extend(mun_params)
+
     if data_inicio:
         sql += " AND data >= ?"
         params.append(data_inicio)
@@ -92,13 +102,15 @@ def query_ocorrencias(tipo=None, municipio=None, data_inicio=None, data_fim=None
     return [dict(r) for r in rows]
 
 
-def get_stats(municipio=None, data_inicio=None, data_fim=None):
+def get_stats(municipios=None, data_inicio=None, data_fim=None):
     conn = get_db()
     where = "WHERE 1=1"
     params = []
-    if municipio:
-        where += " AND municipio = ?"
-        params.append(municipio)
+
+    mun_sql, mun_params = _build_municipio_clause(municipios)
+    where += mun_sql
+    params.extend(mun_params)
+
     if data_inicio:
         where += " AND data >= ?"
         params.append(data_inicio)
@@ -119,6 +131,13 @@ def get_stats(municipio=None, data_inicio=None, data_fim=None):
 
     conn.close()
     return stats
+
+
+def get_municipios():
+    conn = get_db()
+    rows = conn.execute("SELECT DISTINCT municipio FROM ocorrencias WHERE municipio IS NOT NULL AND municipio != '' ORDER BY municipio").fetchall()
+    conn.close()
+    return [r["municipio"] for r in rows]
 
 
 def get_comunidades():

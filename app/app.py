@@ -3,7 +3,7 @@ import logging
 import threading
 from flask import Flask, render_template, jsonify, request
 
-from app.models import init_db, query_ocorrencias, get_stats, get_comunidades, get_date_range, get_import_log
+from app.models import init_db, query_ocorrencias, get_stats, get_comunidades, get_date_range, get_import_log, get_municipios
 from app.importer import import_xlsx, import_all, seed_comunidades, download_xlsx
 from app.config import SSP_SOURCES, XLSX_DIR
 
@@ -29,14 +29,15 @@ def index():
 def api_ocorrencias():
     """Retorna ocorrências filtradas como JSON otimizado para o mapa."""
     tipo = request.args.get("tipo")
-    municipio = request.args.get("municipio")
+    municipios_param = request.args.get("municipios")
+    municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
     natureza = request.args.get("natureza")
 
     rows = query_ocorrencias(
         tipo=tipo,
-        municipio=municipio,
+        municipios=municipios,
         data_inicio=data_inicio,
         data_fim=data_fim,
         natureza=natureza,
@@ -75,11 +76,17 @@ def api_ocorrencias():
 
 @app.route("/api/stats")
 def api_stats():
-    municipio = request.args.get("municipio")
+    municipios_param = request.args.get("municipios")
+    municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
-    stats = get_stats(municipio=municipio, data_inicio=data_inicio, data_fim=data_fim)
+    stats = get_stats(municipios=municipios, data_inicio=data_inicio, data_fim=data_fim)
     return jsonify(stats)
+
+
+@app.route("/api/municipios")
+def api_municipios():
+    return jsonify(get_municipios())
 
 
 @app.route("/api/comunidades")

@@ -284,16 +284,7 @@ def import_xlsx(tipo, year, filepath=None):
                 skipped += 1
                 continue
 
-            municipio = str(row[col_idx["municipio"]]).strip() if "municipio" in col_idx and row[col_idx["municipio"]] else None
-
-            # Filtrar apenas Baixada Santista
-            if not is_baixada(municipio):
-                skipped += 1
-                continue
-
-            # Normalizar nome do município
-            if municipio:
-                municipio = municipio.upper().strip()
+            municipio = str(row[col_idx["municipio"]]).strip().upper() if "municipio" in col_idx and row[col_idx["municipio"]] else None
 
             record = (
                 tipo,

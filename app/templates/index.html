@@ -74,18 +74,23 @@
         <input type="date" class="filter-input" id="filterDataFim" />
       </div>
     </div>
-    <select class="filter-select" id="filterMunicipio">
-      <option value="">Todos os municípios</option>
-      <option value="SANTOS">Santos</option>
-      <option value="S.VICENTE">São Vicente</option>
-      <option value="GUARUJA">Guarujá</option>
-      <option value="PRAIA GRANDE">Praia Grande</option>
-      <option value="CUBATAO">Cubatão</option>
-      <option value="ITANHAEM">Itanhaém</option>
-      <option value="MONGAGUA">Mongaguá</option>
-      <option value="PERUIBE">Peruíbe</option>
-      <option value="BERTIOGA">Bertioga</option>
-    </select>
+    <div class="multiselect" id="municipioSelect">
+      <button class="multiselect-toggle" id="municipioToggle">
+        <span class="multiselect-label" id="municipioLabel">Baixada Santista (9)</span>
+        <span class="multiselect-arrow">&#9662;</span>
+      </button>
+      <div class="multiselect-dropdown hidden" id="municipioDropdown">
+        <input type="text" class="multiselect-search" id="municipioSearch" placeholder="Buscar cidade..." />
+        <div class="multiselect-actions">
+          <button class="ms-action" id="btnBaixada">Baixada Santista</button>
+          <button class="ms-action" id="btnSelectAll">Todas</button>
+          <button class="ms-action" id="btnSelectNone">Nenhuma</button>
+        </div>
+        <div class="multiselect-list" id="municipioList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
     <select class="filter-select" id="filterNatureza">
       <option value="">Todas as naturezas</option>
       <option value="FURTO">Furtos</option>

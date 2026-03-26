@@ -4,8 +4,16 @@ let currentView = 'heat';
 let activeLayers = { criminais: true, celulares: true, veiculos: true, favelas: true };
 let rawData = { criminais: [], celulares: [], veiculos: [] };
 let comunidades = [];
+let allMunicipios = [];
+let selectedMunicipios = new Set();
 
 const COLORS = { criminais: '#ef4444', celulares: '#f59e0b', veiculos: '#3b82f6' };
+
+const BAIXADA_SANTISTA = [
+  'SANTOS', 'S.VICENTE', 'SAO VICENTE', 'GUARUJA', 'GUARUJÁ',
+  'PRAIA GRANDE', 'CUBATAO', 'CUBATÃO', 'ITANHAEM', 'ITANHAÉM',
+  'MONGAGUA', 'MONGAGUÁ', 'PERUIBE', 'PERUÍBE', 'BERTIOGA',
+];
 
 const TILE_URLS = {
   dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
@@ -23,8 +31,6 @@ function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('theme', theme);
   document.getElementById('themeIcon').textContent = theme === 'dark' ? '\u2600\uFE0F' : '\uD83C\uDF19';
-
-  // Swap map tiles
   if (tileLayer && map) {
     map.removeLayer(tileLayer);
     tileLayer = L.tileLayer(TILE_URLS[theme], {
@@ -36,6 +42,145 @@ function setTheme(theme) {
 
 function toggleTheme() {
   setTheme(getTheme() === 'dark' ? 'light' : 'dark');
+}
+
+// ======= Multi-select Municipios =======
+function isBaixada(mun) {
+  const norm = mun.toUpperCase().replace(/[^A-Z ]/g, '');
+  return BAIXADA_SANTISTA.some(b => b.replace(/[^A-Z ]/g, '') === norm);
+}
+
+function selectBaixada() {
+  selectedMunicipios.clear();
+  allMunicipios.forEach(m => {
+    if (isBaixada(m)) selectedMunicipios.add(m);
+  });
+  renderMunicipioList();
+  updateMunicipioLabel();
+}
+
+function selectAll() {
+  selectedMunicipios = new Set(allMunicipios);
+  renderMunicipioList();
+  updateMunicipioLabel();
+}
+
+function selectNone() {
+  selectedMunicipios.clear();
+  renderMunicipioList();
+  updateMunicipioLabel();
+}
+
+function updateMunicipioLabel() {
+  const label = document.getElementById('municipioLabel');
+  const total = allMunicipios.length;
+  const sel = selectedMunicipios.size;
+
+  if (sel === 0) {
+    label.textContent = 'Nenhum munic\u00edpio';
+  } else if (sel === total) {
+    label.textContent = `Todos os munic\u00edpios (${total})`;
+  } else {
+    // Check if selection matches Baixada
+    const baixadaSet = new Set(allMunicipios.filter(m => isBaixada(m)));
+    const isBaixadaSelection = sel === baixadaSet.size &&
+      [...selectedMunicipios].every(m => baixadaSet.has(m));
+    if (isBaixadaSelection) {
+      label.textContent = `Baixada Santista (${sel})`;
+    } else {
+      label.textContent = `${sel} munic\u00edpio${sel > 1 ? 's' : ''}`;
+    }
+  }
+}
+
+function renderMunicipioList(filter) {
+  const list = document.getElementById('municipioList');
+  const search = (filter || '').toLowerCase();
+
+  list.innerHTML = '';
+
+  // Sort: Baixada first, then alphabetical
+  const sorted = [...allMunicipios].sort((a, b) => {
+    const aB = isBaixada(a);
+    const bB = isBaixada(b);
+    if (aB && !bB) return -1;
+    if (!aB && bB) return 1;
+    return a.localeCompare(b);
+  });
+
+  sorted.forEach(mun => {
+    if (search && !mun.toLowerCase().includes(search)) return;
+
+    const item = document.createElement('div');
+    item.className = 'ms-item' + (selectedMunicipios.has(mun) ? ' selected' : '');
+
+    const check = document.createElement('span');
+    check.className = 'ms-check';
+    check.textContent = '\u2713';
+
+    const name = document.createElement('span');
+    name.textContent = mun;
+
+    item.appendChild(check);
+    item.appendChild(name);
+
+    if (isBaixada(mun)) {
+      const badge = document.createElement('span');
+      badge.className = 'ms-badge baixada';
+      badge.textContent = 'Baixada';
+      item.appendChild(badge);
+    }
+
+    item.addEventListener('click', () => {
+      if (selectedMunicipios.has(mun)) {
+        selectedMunicipios.delete(mun);
+      } else {
+        selectedMunicipios.add(mun);
+      }
+      item.classList.toggle('selected');
+      updateMunicipioLabel();
+    });
+
+    list.appendChild(item);
+  });
+}
+
+async function loadMunicipios() {
+  try {
+    allMunicipios = await apiFetch('/api/municipios');
+    selectBaixada();
+  } catch (e) {
+    console.warn('Erro ao carregar munic\u00edpios:', e);
+  }
+}
+
+function initMunicipioSelect() {
+  const toggle = document.getElementById('municipioToggle');
+  const dropdown = document.getElementById('municipioDropdown');
+  const search = document.getElementById('municipioSearch');
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('hidden');
+    if (!dropdown.classList.contains('hidden')) {
+      search.focus();
+    }
+  });
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#municipioSelect')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  search.addEventListener('input', () => {
+    renderMunicipioList(search.value);
+  });
+
+  document.getElementById('btnBaixada').addEventListener('click', selectBaixada);
+  document.getElementById('btnSelectAll').addEventListener('click', selectAll);
+  document.getElementById('btnSelectNone').addEventListener('click', selectNone);
 }
 
 // ======= Map Init =======
@@ -66,7 +211,7 @@ function initMap() {
   // Load initial data
   loadDateRange();
   loadComunidades();
-  loadData();
+  loadMunicipios().then(() => loadData());
   loadImportLog();
 }
 
@@ -137,19 +282,6 @@ async function loadData() {
     document.getElementById('stat-homicidios').textContent = (stats.homicidios || 0).toLocaleString('pt-BR');
 
     renderView();
-
-    // Zoom to filtered municipality
-    const mun = document.getElementById('filterMunicipio').value;
-    if (mun) {
-      const allPts = [
-        ...rawData.criminais.map(d => [d[0], d[1]]),
-        ...rawData.celulares.map(d => [d[0], d[1]]),
-        ...rawData.veiculos.map(d => [d[0], d[1]]),
-      ];
-      if (allPts.length > 0) {
-        map.fitBounds(L.latLngBounds(allPts), { padding: [60, 60] });
-      }
-    }
   } catch (e) {
     console.error('Erro ao carregar dados:', e);
   } finally {
@@ -159,12 +291,13 @@ async function loadData() {
 
 function buildFilterParams() {
   const params = new URLSearchParams();
-  const mun = document.getElementById('filterMunicipio').value;
   const nat = document.getElementById('filterNatureza').value;
   const di = document.getElementById('filterDataInicio').value;
   const df = document.getElementById('filterDataFim').value;
 
-  if (mun) params.set('municipio', mun);
+  if (selectedMunicipios.size > 0 && selectedMunicipios.size < allMunicipios.length) {
+    params.set('municipios', [...selectedMunicipios].join(','));
+  }
   if (nat) params.set('natureza', nat);
   if (di) params.set('data_inicio', di);
   if (df) params.set('data_fim', df);
@@ -306,7 +439,6 @@ async function triggerImport(tipo, ano) {
       return;
     }
 
-    // Poll status
     pollImportStatus();
   } catch (e) {
     statusEl.className = 'import-status error';
@@ -339,7 +471,8 @@ async function pollImportStatus() {
           }
           statusEl.textContent = msg || 'Conclu\u00eddo';
         }
-        // Refresh data and log
+        // Refresh data, municipios list, and log
+        loadMunicipios();
         loadData();
         loadImportLog();
       }
@@ -369,6 +502,7 @@ async function loadImportLog() {
 
 // ======= Event Listeners =======
 document.addEventListener('DOMContentLoaded', () => {
+  initMunicipioSelect();
   initMap();
 
   // Theme toggle
@@ -401,7 +535,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnUpdate').addEventListener('click', () => triggerImport(null, 2026));
   document.getElementById('btnImportAll').addEventListener('click', () => {
     if (confirm('Importar todos os dados 2025-2026? Isso pode levar alguns minutos.')) {
-      // Import 2025 first, then 2026
       triggerImport(null, 2025);
     }
   });
