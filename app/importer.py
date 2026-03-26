@@ -35,8 +35,8 @@ COLUMN_MAPS = {
         "hora": ["hora_ocorrencia_bo", "hora_ocorrencia", "horaocorrencia", "hora_fato"],
         "bairro": ["bairro", "nome_bairro"],
         "logradouro": ["logradouro", "nome_logradouro", "endereco", "logradouro_fato"],
-        "municipio": ["municipio_circunscricao", "municipio", "cidade", "nome_municipio",
-                       "municipio_fato"],
+        "municipio": ["nome_municipio_circ", "municipio_circunscricao", "municipio",
+                       "cidade", "nome_municipio", "municipio_fato"],
         "tipo_local": ["descr_tipolocal", "tipo_local", "tipolocal", "local"],
     },
     "celulares": {
@@ -47,7 +47,7 @@ COLUMN_MAPS = {
         "hora": ["hora_ocorrencia_bo", "hora_ocorrencia", "horaocorrencia"],
         "bairro": ["bairro", "nome_bairro"],
         "logradouro": ["logradouro", "nome_logradouro"],
-        "municipio": ["municipio_circunscricao", "municipio", "cidade"],
+        "municipio": ["nome_municipio_circ", "municipio_circunscricao", "municipio", "cidade"],
         "tipo_local": ["descr_tipolocal", "tipo_local", "tipolocal"],
     },
     "veiculos": {
@@ -58,7 +58,7 @@ COLUMN_MAPS = {
         "hora": ["hora_ocorrencia_bo", "hora_ocorrencia", "horaocorrencia"],
         "bairro": ["bairro", "nome_bairro"],
         "logradouro": ["logradouro", "nome_logradouro"],
-        "municipio": ["municipio_circunscricao", "municipio", "cidade"],
+        "municipio": ["nome_municipio_circ", "municipio_circunscricao", "municipio", "cidade"],
         "tipo_local": ["descr_tipolocal", "tipo_local", "tipolocal"],
         "tipo_veiculo": ["descr_marca_veiculo", "tipo_veiculo", "marca_veiculo",
                           "descr_tipo_veiculo", "veiculo"],
@@ -174,9 +174,9 @@ def is_baixada(municipio):
     """Verifica se o município pertence à Baixada Santista."""
     if not municipio:
         return False
-    mun_upper = str(municipio).upper().strip()
-    return any(mun_upper == m or mun_upper.startswith(m.split()[0])
-               for m in MUNICIPIOS_BAIXADA)
+    mun_upper = re.sub(r'[^A-Z ]', '', str(municipio).upper().strip())
+    normalized_list = [re.sub(r'[^A-Z ]', '', m) for m in MUNICIPIOS_BAIXADA]
+    return mun_upper in normalized_list
 
 
 def download_xlsx(tipo, year):
