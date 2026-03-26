@@ -73,23 +73,53 @@ def normalize_col(name):
     return re.sub(r'[^a-z0-9]', '', str(name).lower().strip())
 
 
+def _sheet_looks_like_data(ws):
+    """Verifica se uma aba parece conter dados reais (tem coluna 'latitude' ou muitas colunas)."""
+    for row in ws.iter_rows(min_row=1, max_row=5, values_only=True):
+        cells = [str(c).strip().lower() for c in row if c is not None]
+        if not cells:
+            continue
+        # Se tem "latitude" ou muitas colunas (>5), provavelmente é dados
+        for c in cells:
+            if "latitude" in c or "longitude" in c:
+                return True
+        if len(cells) >= 5:
+            # Checa se NÃO é texto descritivo longo (típico de aba metodologia)
+            if all(len(c) < 80 for c in cells):
+                return True
+    return False
+
+
 def find_data_sheet(wb):
     """Encontra a aba principal de dados, ignorando abas de metodologia/dicionário."""
     sheets = wb.sheetnames
     if len(sheets) == 1:
         return sheets[0]
 
-    for name in sheets:
-        if normalize_col(name) in {normalize_col(s) for s in SKIP_SHEETS}:
-            continue
-        # Retorna a primeira aba que NÃO é de metadados
-        return name
+    skip_normalized = {normalize_col(s) for s in SKIP_SHEETS}
 
-    # Fallback: pega a primeira com mais de 10 linhas
+    # Primeira passada: procura aba com coluna latitude/longitude
     for name in sheets:
+        if normalize_col(name) in skip_normalized:
+            continue
         ws = wb[name]
-        if ws.max_row and ws.max_row > 10:
+        if _sheet_looks_like_data(ws):
             return name
+
+    # Segunda passada: pega a aba com mais linhas (provavelmente é a de dados)
+    best = None
+    best_rows = 0
+    for name in sheets:
+        if normalize_col(name) in skip_normalized:
+            continue
+        ws = wb[name]
+        rows = ws.max_row or 0
+        if rows > best_rows:
+            best_rows = rows
+            best = name
+
+    if best:
+        return best
 
     return sheets[0]
 
@@ -207,20 +237,30 @@ def import_xlsx(tipo, year, filepath=None):
     ws = wb[sheet_name]
     logger.info(f"Usando aba: {sheet_name}")
 
-    # Ler cabeçalhos
+    # Ler cabeçalhos — pode precisar pular linhas de "apresentação" no topo
     rows_iter = ws.iter_rows(values_only=True)
-    headers = next(rows_iter, None)
-    if not headers:
-        wb.close()
-        return {"ok": False, "error": "Planilha sem cabeçalhos"}
+    headers = None
+    col_idx = {}
+    skipped_header_rows = 0
 
-    headers = [str(h).strip() if h else "" for h in headers]
-    col_idx = map_columns(headers, tipo)
-    logger.info(f"Colunas mapeadas: {col_idx}")
+    for row in rows_iter:
+        candidate = [str(h).strip() if h else "" for h in row]
+        # Tenta mapear esta linha como cabeçalho
+        test_idx = map_columns(candidate, tipo)
+        if "lat" in test_idx and "lon" in test_idx:
+            headers = candidate
+            col_idx = test_idx
+            break
+        skipped_header_rows += 1
+        if skipped_header_rows > 20:
+            break
 
-    if "lat" not in col_idx or "lon" not in col_idx:
+    if not headers or "lat" not in col_idx or "lon" not in col_idx:
         wb.close()
-        return {"ok": False, "error": f"Colunas lat/lon não encontradas. Colunas disponíveis: {headers}"}
+        # Mostra as primeiras linhas para debug
+        return {"ok": False, "error": f"Colunas lat/lon não encontradas após {skipped_header_rows} linhas. Verifique a estrutura do arquivo."}
+
+    logger.info(f"Colunas mapeadas (após pular {skipped_header_rows} linhas): {col_idx}")
 
     conn = get_db()
     # Remove dados anteriores deste tipo/ano para reimportação
