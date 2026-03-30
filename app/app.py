@@ -30,9 +30,9 @@ def api_ocorrencias():
     """Retorna ocorrências filtradas como JSON otimizado para o mapa."""
     tipo = request.args.get("tipo")
     municipios_param = request.args.get("municipios")
-    municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
+    municipios = [m.strip() for m in municipios_param.split("|")] if municipios_param else None
     naturezas_param = request.args.get("naturezas")
-    naturezas = [n.strip() for n in naturezas_param.split(",")] if naturezas_param else None
+    naturezas = [n.strip() for n in naturezas_param.split("|")] if naturezas_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
 
@@ -78,9 +78,9 @@ def api_ocorrencias():
 @app.route("/api/stats")
 def api_stats():
     municipios_param = request.args.get("municipios")
-    municipios = [m.strip() for m in municipios_param.split(",")] if municipios_param else None
+    municipios = [m.strip() for m in municipios_param.split("|")] if municipios_param else None
     naturezas_param = request.args.get("naturezas")
-    naturezas = [n.strip() for n in naturezas_param.split(",")] if naturezas_param else None
+    naturezas = [n.strip() for n in naturezas_param.split("|")] if naturezas_param else None
     data_inicio = request.args.get("data_inicio")
     data_fim = request.args.get("data_fim")
     stats = get_stats(municipios=municipios, data_inicio=data_inicio, data_fim=data_fim, naturezas=naturezas)
