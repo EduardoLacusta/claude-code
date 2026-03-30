@@ -3,7 +3,7 @@ import logging
 import threading
 from flask import Flask, render_template, jsonify, request
 
-from app.models import init_db, query_ocorrencias, get_stats, get_comunidades, get_date_range, get_import_log, get_municipios
+from app.models import init_db, query_ocorrencias, get_stats, get_comunidades, get_date_range, get_import_log, get_municipios, get_naturezas
 from app.importer import import_xlsx, import_all, seed_comunidades, download_xlsx
 from app.config import SSP_SOURCES, XLSX_DIR
 
@@ -90,6 +90,11 @@ def api_stats():
 @app.route("/api/municipios")
 def api_municipios():
     return jsonify(get_municipios())
+
+
+@app.route("/api/naturezas")
+def api_naturezas():
+    return jsonify(get_naturezas())
 
 
 @app.route("/api/comunidades")

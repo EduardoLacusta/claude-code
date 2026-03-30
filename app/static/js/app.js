@@ -6,8 +6,8 @@ let rawData = { criminais: [], celulares: [], veiculos: [] };
 let comunidades = [];
 let allMunicipios = [];
 let selectedMunicipios = new Set();
-let activeNaturezas = new Set(['FURTO', 'ROUBO', 'HOMICÍDIO', 'TRÁFICO', 'LESÃO']);
-const ALL_NATUREZAS = ['FURTO', 'ROUBO', 'HOMICÍDIO', 'TRÁFICO', 'LESÃO'];
+let allNaturezas = [];
+let selectedNaturezas = new Set();
 
 const COLORS = { criminais: '#ef4444', celulares: '#f59e0b', veiculos: '#3b82f6' };
 
@@ -166,6 +166,107 @@ async function loadMunicipios() {
   }
 }
 
+// ======= Multi-select Naturezas =======
+async function loadNaturezas() {
+  try {
+    allNaturezas = await apiFetch('/api/naturezas');
+    selectedNaturezas = new Set(allNaturezas);
+    renderNaturezaList();
+    updateNaturezaLabel();
+  } catch (e) {
+    console.warn('Erro ao carregar naturezas:', e);
+  }
+}
+
+function selectAllNaturezas() {
+  selectedNaturezas = new Set(allNaturezas);
+  renderNaturezaList();
+  updateNaturezaLabel();
+  debouncedLoadData();
+}
+
+function selectNoNaturezas() {
+  selectedNaturezas.clear();
+  renderNaturezaList();
+  updateNaturezaLabel();
+  debouncedLoadData();
+}
+
+function updateNaturezaLabel() {
+  const label = document.getElementById('naturezaLabel');
+  const sel = selectedNaturezas.size;
+  const total = allNaturezas.length;
+  if (sel === 0) {
+    label.textContent = 'Nenhuma natureza';
+  } else if (sel === total) {
+    label.textContent = `Todas as naturezas (${total})`;
+  } else {
+    label.textContent = `${sel} natureza${sel > 1 ? 's' : ''}`;
+  }
+}
+
+function renderNaturezaList(filter) {
+  const list = document.getElementById('naturezaList');
+  const search = (filter || '').toLowerCase();
+  list.innerHTML = '';
+
+  allNaturezas.forEach(nat => {
+    if (search && !nat.toLowerCase().includes(search)) return;
+    const item = document.createElement('div');
+    item.className = 'ms-item' + (selectedNaturezas.has(nat) ? ' selected' : '');
+
+    const check = document.createElement('span');
+    check.className = 'ms-check';
+    check.textContent = '\u2713';
+
+    const name = document.createElement('span');
+    name.textContent = nat;
+
+    item.appendChild(check);
+    item.appendChild(name);
+
+    item.addEventListener('click', () => {
+      if (selectedNaturezas.has(nat)) {
+        selectedNaturezas.delete(nat);
+      } else {
+        selectedNaturezas.add(nat);
+      }
+      item.classList.toggle('selected');
+      updateNaturezaLabel();
+      debouncedLoadData();
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function initNaturezaSelect() {
+  const toggle = document.getElementById('naturezaToggle');
+  const dropdown = document.getElementById('naturezaDropdown');
+  const search = document.getElementById('naturezaSearch');
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('hidden');
+    if (!dropdown.classList.contains('hidden')) {
+      search.focus();
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#naturezaSelect')) {
+      dropdown.classList.add('hidden');
+    }
+  });
+
+  search.addEventListener('input', () => {
+    renderNaturezaList(search.value);
+  });
+
+  document.getElementById('btnNatTodas').addEventListener('click', selectAllNaturezas);
+  document.getElementById('btnNatNenhuma').addEventListener('click', selectNoNaturezas);
+}
+
 function initMunicipioSelect() {
   const toggle = document.getElementById('municipioToggle');
   const dropdown = document.getElementById('municipioDropdown');
@@ -223,7 +324,7 @@ function initMap() {
   // Load initial data
   loadDateRange();
   loadComunidades();
-  loadMunicipios().then(() => loadData());
+  Promise.all([loadMunicipios(), loadNaturezas()]).then(() => loadData());
   loadImportLog();
 }
 
@@ -310,9 +411,9 @@ function buildFilterParams() {
     params.set('municipios', [...selectedMunicipios].join(','));
   }
   // Only send naturezas filter if not all are active
-  if (activeNaturezas.size > 0 && activeNaturezas.size < ALL_NATUREZAS.length) {
-    params.set('naturezas', [...activeNaturezas].join(','));
-  } else if (activeNaturezas.size === 0) {
+  if (selectedNaturezas.size > 0 && selectedNaturezas.size < allNaturezas.length) {
+    params.set('naturezas', [...selectedNaturezas].join(','));
+  } else if (selectedNaturezas.size === 0) {
     params.set('naturezas', '__NONE__');
   }
   if (di) params.set('data_inicio', di);
@@ -487,8 +588,9 @@ async function pollImportStatus() {
           }
           statusEl.textContent = msg || 'Conclu\u00eddo';
         }
-        // Refresh data, municipios list, and log
+        // Refresh data, municipios list, naturezas list, and log
         loadMunicipios();
+        loadNaturezas();
         loadData();
         loadImportLog();
       }
@@ -544,19 +646,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Natureza toggles
-  document.querySelectorAll('.natureza-toggle').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const nat = btn.dataset.natureza;
-      if (activeNaturezas.has(nat)) {
-        activeNaturezas.delete(nat);
-      } else {
-        activeNaturezas.add(nat);
-      }
-      btn.classList.toggle('active');
-      debouncedLoadData();
-    });
-  });
+  // Natureza select
+  initNaturezaSelect();
 
   // Date inputs
   document.getElementById('filterDataInicio').addEventListener('change', debouncedLoadData);

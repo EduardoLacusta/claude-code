@@ -166,25 +166,9 @@ body {
 .filter-input:focus, .filter-select:focus { border-color:var(--border-focus); }
 .filter-select { margin-bottom:6px; }
 
-/* ======= Natureza Toggles ======= */
-.natureza-toggles { display:flex; flex-direction:column; gap:0; }
-.natureza-toggle {
-  display:flex; align-items:center; gap:8px;
-  padding:6px 10px; border-radius:6px; cursor:pointer;
-  transition:background 0.2s; border:none; background:transparent;
-  color:var(--text-body); width:100%; text-align:left; font-family:inherit;
-}
-.natureza-toggle:hover { background:var(--bg-hover); }
-.natureza-toggle .nt-check {
-  width:14px; height:14px; border-radius:3px;
-  border:1.5px solid var(--border-input); flex-shrink:0;
-  display:flex; align-items:center; justify-content:center;
-  font-size:10px; color:transparent; transition:all 0.15s;
-}
-.natureza-toggle.active .nt-check {
-  background:var(--btn-primary-bg); border-color:var(--btn-primary-bg); color:#fff;
-}
-.natureza-toggle .nt-label { font-size:12px; font-weight:500; }
+/* ======= Natureza Select (reuses multiselect styles) ======= */
+#naturezaSelect { z-index:9; }
+#naturezaSelect .multiselect-dropdown { z-index:99; }
 
 /* ======= Multi-select ======= */
 .multiselect { position:relative; margin-bottom:6px; z-index:10; }

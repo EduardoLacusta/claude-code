@@ -92,22 +92,21 @@
       </div>
     </div>
     <label class="filter-label" style="margin-top:6px">Natureza</label>
-    <div class="natureza-toggles" id="naturezaToggles">
-      <button class="natureza-toggle active" data-natureza="FURTO">
-        <span class="nt-check">&#10003;</span><span class="nt-label">Furtos</span>
+    <div class="multiselect" id="naturezaSelect">
+      <button class="multiselect-toggle" id="naturezaToggle">
+        <span class="multiselect-label" id="naturezaLabel">Todas as naturezas</span>
+        <span class="multiselect-arrow">&#9662;</span>
       </button>
-      <button class="natureza-toggle active" data-natureza="ROUBO">
-        <span class="nt-check">&#10003;</span><span class="nt-label">Roubos</span>
-      </button>
-      <button class="natureza-toggle active" data-natureza="HOMICÍDIO">
-        <span class="nt-check">&#10003;</span><span class="nt-label">Homicídios</span>
-      </button>
-      <button class="natureza-toggle active" data-natureza="TRÁFICO">
-        <span class="nt-check">&#10003;</span><span class="nt-label">Tráfico</span>
-      </button>
-      <button class="natureza-toggle active" data-natureza="LESÃO">
-        <span class="nt-check">&#10003;</span><span class="nt-label">Lesão Corporal</span>
-      </button>
+      <div class="multiselect-dropdown hidden" id="naturezaDropdown">
+        <input type="text" class="multiselect-search" id="naturezaSearch" placeholder="Buscar natureza..." />
+        <div class="multiselect-actions">
+          <button class="ms-action" id="btnNatTodas">Todas</button>
+          <button class="ms-action" id="btnNatNenhuma">Nenhuma</button>
+        </div>
+        <div class="multiselect-list" id="naturezaList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
     </div>
   </div>
 

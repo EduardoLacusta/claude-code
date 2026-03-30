@@ -38,6 +38,7 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_ocorrencias_municipio ON ocorrencias(municipio);
         CREATE INDEX IF NOT EXISTS idx_ocorrencias_lat_lon ON ocorrencias(lat, lon);
         CREATE INDEX IF NOT EXISTS idx_ocorrencias_tipo_data ON ocorrencias(tipo, data);
+        CREATE INDEX IF NOT EXISTS idx_ocorrencias_natureza ON ocorrencias(natureza);
 
         CREATE TABLE IF NOT EXISTS comunidades (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -71,15 +72,11 @@ def _build_municipio_clause(municipios):
 
 
 def _build_natureza_clause(naturezas):
-    """Constrói cláusula WHERE para lista de naturezas (LIKE com OR). Retorna (sql, params)."""
+    """Constrói cláusula WHERE para lista de naturezas (IN exato). Retorna (sql, params)."""
     if not naturezas:
         return "", []
-    conditions = []
-    params = []
-    for n in naturezas:
-        conditions.append("natureza LIKE ?")
-        params.append(f"%{n}%")
-    return " AND (" + " OR ".join(conditions) + ")", params
+    placeholders = ",".join("?" for _ in naturezas)
+    return f" AND natureza IN ({placeholders})", list(naturezas)
 
 
 def query_ocorrencias(tipo=None, municipios=None, data_inicio=None, data_fim=None,
@@ -171,6 +168,13 @@ def get_date_range():
     if row and row["min_data"]:
         return {"min": row["min_data"], "max": row["max_data"]}
     return {"min": "2025-01-01", "max": "2026-12-31"}
+
+
+def get_naturezas():
+    conn = get_db()
+    rows = conn.execute("SELECT DISTINCT natureza FROM ocorrencias WHERE natureza IS NOT NULL AND natureza != '' ORDER BY natureza").fetchall()
+    conn.close()
+    return [r["natureza"] for r in rows]
 
 
 def get_import_log():
