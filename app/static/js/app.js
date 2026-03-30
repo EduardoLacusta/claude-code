@@ -160,7 +160,13 @@ function renderMunicipioList(filter) {
 async function loadMunicipios() {
   try {
     allMunicipios = await apiFetch('/api/municipios');
-    selectBaixada();
+    // Select Baixada without triggering load (init handles first load)
+    selectedMunicipios.clear();
+    allMunicipios.forEach(m => {
+      if (isBaixada(m)) selectedMunicipios.add(m);
+    });
+    renderMunicipioList();
+    updateMunicipioLabel();
   } catch (e) {
     console.warn('Erro ao carregar munic\u00edpios:', e);
   }

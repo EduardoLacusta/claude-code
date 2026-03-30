@@ -170,7 +170,9 @@ body {
 .panel-filtros { position:relative; z-index:2; }
 
 /* ======= Multi-select ======= */
-.multiselect { position:relative; margin-bottom:6px; z-index:10; }
+.multiselect { position:relative; margin-bottom:6px; }
+#municipioSelect { z-index:10; }
+#naturezaSelect { z-index:5; }
 .multiselect-toggle {
   width:100%; padding:7px 10px; border-radius:6px;
   background:var(--bg-input); border:1px solid var(--border-input);
