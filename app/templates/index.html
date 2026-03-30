@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de Risco - Baixada Santista - CPFL Piratininga</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div id="map"></div>
+
+<div class="controls">
+  <!-- Brand -->
+  <div class="panel">
+    <div class="brand">
+      <div class="brand-dot"></div>
+      <div>
+        <h1>Mapa de Risco — Baixada Santista</h1>
+        <div class="sub">CPFL Piratininga · Dados SSP-SP</div>
+      </div>
+      <button class="theme-toggle" id="themeToggle" title="Alternar tema">
+        <span class="theme-icon" id="themeIcon">☀️</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Visualização -->
+  <div class="panel">
+    <h2>Visualização</h2>
+    <div class="view-modes">
+      <button class="view-btn active" data-view="heat">Heatmap</button>
+      <button class="view-btn" data-view="points">Pontos</button>
+      <button class="view-btn" data-view="cluster">Cluster</button>
+    </div>
+  </div>
+
+  <!-- Camadas -->
+  <div class="panel">
+    <h2>Camadas</h2>
+    <button class="layer-toggle active" data-layer="criminais">
+      <div class="dot" style="background:#ef4444"></div>
+      <span class="label">Dados Criminais</span>
+      <span class="count" id="cnt-criminais">0</span>
+    </button>
+    <button class="layer-toggle active" data-layer="celulares">
+      <div class="dot" style="background:#f59e0b"></div>
+      <span class="label">Celulares Subtraídos</span>
+      <span class="count" id="cnt-celulares">0</span>
+    </button>
+    <button class="layer-toggle active" data-layer="veiculos">
+      <div class="dot" style="background:#3b82f6"></div>
+      <span class="label">Veículos Subtraídos</span>
+      <span class="count" id="cnt-veiculos">0</span>
+    </button>
+    <button class="layer-toggle active" data-layer="favelas">
+      <div class="dot" style="background:#a855f7"></div>
+      <span class="label">Comunidades / Áreas de Risco</span>
+      <span class="count" id="cnt-favelas">—</span>
+    </button>
+  </div>
+
+  <!-- Filtros -->
+  <div class="panel">
+    <h2>Filtros</h2>
+    <div class="filter-row">
+      <label class="filter-label">Período</label>
+      <div class="date-range">
+        <input type="date" class="filter-input" id="filterDataInicio" />
+        <span class="date-sep">a</span>
+        <input type="date" class="filter-input" id="filterDataFim" />
+      </div>
+    </div>
+    <div class="multiselect" id="municipioSelect">
+      <button class="multiselect-toggle" id="municipioToggle">
+        <span class="multiselect-label" id="municipioLabel">Baixada Santista (9)</span>
+        <span class="multiselect-arrow">&#9662;</span>
+      </button>
+      <div class="multiselect-dropdown hidden" id="municipioDropdown">
+        <input type="text" class="multiselect-search" id="municipioSearch" placeholder="Buscar cidade..." />
+        <div class="multiselect-actions">
+          <button class="ms-action" id="btnBaixada">Baixada Santista</button>
+          <button class="ms-action" id="btnSelectAll">Todas</button>
+          <button class="ms-action" id="btnSelectNone">Nenhuma</button>
+        </div>
+        <div class="multiselect-list" id="municipioList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+    <label class="filter-label" style="margin-top:6px">Natureza</label>
+    <div class="multiselect" id="naturezaSelect">
+      <button class="multiselect-toggle" id="naturezaToggle">
+        <span class="multiselect-label" id="naturezaLabel">Todas as naturezas</span>
+        <span class="multiselect-arrow">&#9662;</span>
+      </button>
+      <div class="multiselect-dropdown hidden" id="naturezaDropdown">
+        <input type="text" class="multiselect-search" id="naturezaSearch" placeholder="Buscar natureza..." />
+        <div class="multiselect-actions">
+          <button class="ms-action" id="btnNatTodas">Todas</button>
+          <button class="ms-action" id="btnNatNenhuma">Nenhuma</button>
+        </div>
+        <div class="multiselect-list" id="naturezaList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resumo -->
+  <div class="panel">
+    <h2>Resumo</h2>
+    <div class="stat-grid">
+      <div class="stat"><div class="val" id="stat-total">0</div><div class="lbl">Ocorrências</div></div>
+      <div class="stat"><div class="val" id="stat-roubos">0</div><div class="lbl">Roubos</div></div>
+      <div class="stat"><div class="val" id="stat-furtos">0</div><div class="lbl">Furtos</div></div>
+      <div class="stat"><div class="val" id="stat-homicidios">0</div><div class="lbl">Homicídios</div></div>
+    </div>
+  </div>
+
+  <!-- Admin: Importação -->
+  <div class="panel panel-admin">
+    <h2>Dados</h2>
+    <div class="admin-row">
+      <button class="btn-update" id="btnUpdate">
+        <span class="btn-icon">&#8635;</span> Atualizar SSP 2026
+      </button>
+      <button class="btn-update btn-secondary" id="btnImportAll">
+        Importar Todos (2025-2026)
+      </button>
+    </div>
+    <div class="import-status" id="importStatus"></div>
+    <div class="import-log" id="importLog"></div>
+  </div>
+</div>
+
+<!-- Legenda -->
+<div class="legend-right">
+  <div class="panel">
+    <h2>Intensidade</h2>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="legend-label">Baixa</span>
+      <div class="heat-gradient"></div>
+      <span class="legend-label">Alta</span>
+    </div>
+  </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text">Carregando dados...</div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
