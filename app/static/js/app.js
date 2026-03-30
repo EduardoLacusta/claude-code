@@ -408,11 +408,11 @@ function buildFilterParams() {
   const df = document.getElementById('filterDataFim').value;
 
   if (selectedMunicipios.size > 0 && selectedMunicipios.size < allMunicipios.length) {
-    params.set('municipios', [...selectedMunicipios].join(','));
+    params.set('municipios', [...selectedMunicipios].join('|'));
   }
   // Only send naturezas filter if not all are active
   if (selectedNaturezas.size > 0 && selectedNaturezas.size < allNaturezas.length) {
-    params.set('naturezas', [...selectedNaturezas].join(','));
+    params.set('naturezas', [...selectedNaturezas].join('|'));
   } else if (selectedNaturezas.size === 0) {
     params.set('naturezas', '__NONE__');
   }

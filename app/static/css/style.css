@@ -166,9 +166,8 @@ body {
 .filter-input:focus, .filter-select:focus { border-color:var(--border-focus); }
 .filter-select { margin-bottom:6px; }
 
-/* ======= Natureza Select (reuses multiselect styles) ======= */
-#naturezaSelect { z-index:9; }
-#naturezaSelect .multiselect-dropdown { z-index:99; }
+/* ======= Filtros panel above siblings for dropdowns ======= */
+.panel-filtros { position:relative; z-index:2; }
 
 /* ======= Multi-select ======= */
 .multiselect { position:relative; margin-bottom:6px; z-index:10; }
